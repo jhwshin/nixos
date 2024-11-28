@@ -63,7 +63,17 @@
     nixPath = lib.mapAttrsToList (n: _: "${n}=flake:${n}") flakeInputs;
   };
 
+  boot.loader.systemd-boot.enable = true;
+  boot.loader.efi.canTouchEfiVariables = true;
+
   networking.hostName = "raszagal";
+  networking.networkmanager.enable = true;
+
+  services.xserver.enable = true;
+  services.xserver.displayManager.gdm.enable = true;
+  services.xserver.desktopManager.gnome.enable = true;
+
+  programs.firefox.enable = true;
 
   users.users = {
     hws = {
@@ -71,7 +81,7 @@
       openssh.authorizedKeys.keys = [
 
       ];
-      extraGroups = ["wheel"];
+      extraGroups = ["wheel networkmanager"];
     };
   };
 
