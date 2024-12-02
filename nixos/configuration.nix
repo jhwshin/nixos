@@ -81,7 +81,7 @@
       openssh.authorizedKeys.keys = [
 
       ];
-      extraGroups = ["wheel networkmanager"];
+      extraGroups = ["wheel" "networkmanager"];
     };
   };
 
