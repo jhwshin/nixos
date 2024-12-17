@@ -2,11 +2,14 @@
   description = "jhwshin's nixos config";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-24.05";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-24.11";
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
 
-    home-manager.url = "github:nix-community/home-manager/release-24.05";
+    home-manager.url = "github:nix-community/home-manager/release-24.11";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+
+    # disko.url = "github:nix-community/disko";
+    # disko.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = {
@@ -24,6 +27,10 @@
       # "x86_64-darwin"
     ];
     forAllSystems = nixpkgs.lib.genAttrs systems;
+
+    # common modules for nixos + home-manager
+    commonModules = [ ./hosts/common ];
+    commonHomeModules = [ ./hosts/common/home.nix ];
   in {
     # Your custom packages
     # Accessible through 'nix build', 'nix shell', etc
@@ -36,29 +43,30 @@
     overlays = import ./overlays {inherit inputs;};
     # Reusable nixos modules you might want to export
     # These are usually stuff you would upstream into nixpkgs
-    nixosModules = import ./modules/nixos;
+    # nixosModules = import ./modules/nixos;
     # Reusable home-manager modules you might want to export
     # These are usually stuff you would upstream into home-manager
-    homeManagerModules = import ./modules/home-manager;
+    # homeManagerModules = import ./modules/home-manager;
 
-    # Available through 'nixos-rebuild --flake .#your-hostname'
+    # install nixos via 'nixos-rebuild --flake .#your-hostname'
     nixosConfigurations = {
-      raszagal = nixpkgs.lib.nixosSystem {
+      tassadar = nixpkgs.lib.nixosSystem {
         specialArgs = {inherit inputs outputs;};
         modules = [
-          ./nixos/configuration.nix
-        ];
+          ./hosts/tassadar
+          # disko.nixosModules.disko
+        ]  ++ commonModules;
       };
     };
 
-    # Available through 'home-manager --flake .#your-username@your-hostname'
+    # install home-manager seperately via 'home-manager --flake .#your-username@your-hostname'
     homeConfigurations = {
-      "hws@raszagal" = home-manager.lib.homeManagerConfiguration {
+      "hws@tassadar" = home-manager.lib.homeManagerConfiguration {
         pkgs = nixpkgs.legacyPackages.x86_64-linux; # Home-manager requires 'pkgs' instance
         extraSpecialArgs = {inherit inputs outputs;};
         modules = [
-          ./home-manager/home.nix
-        ];
+          ./hosts/tassadar/home.nix
+        ] ++ commonHomeModules;
       };
     };
   };
